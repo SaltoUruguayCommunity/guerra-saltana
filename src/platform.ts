@@ -7,10 +7,12 @@ export class Platform {
   sdk?: SaltoPlayClient;
   session?: SaltoSession;
   async init() {
-    if (!window.SaltoPlay) return;
+    if (!window.SaltoPlay)
+      throw new Error("No se pudo cargar el SDK de SaltoUruguayServer. Reintentá la conexión.");
     const hosted = window.parent !== window;
     const clientId = import.meta.env.VITE_SALTOPLAY_CLIENT_ID;
-    if (!hosted && !clientId) return;
+    if (!hosted && !clientId)
+      throw new Error("Falta configurar el cliente OAuth de SaltoUruguayServer para este juego.");
     this.sdk = await window.SaltoPlay.init(
       hosted
         ? {}
@@ -24,17 +26,13 @@ export class Platform {
             scopes: [
               "profile:read",
               "saltotag:read",
-              "saves:read",
-              "saves:write",
-              "achievements:read",
-              "achievements:write",
             ],
           },
     );
     this.session = await this.sdk.auth.getSession();
     if (this.session.authenticated) {
-      const tag = await this.sdk.player.getSaltoTag();
-      return tag.tag || tag.displayName;
+      const tag = await this.sdk.player.getSaltoTag().catch(() => null);
+      return tag?.tag || tag?.displayName;
     }
   }
   async login() {
@@ -52,20 +50,6 @@ export class Platform {
     stats.matches++;
     if (result === 0 || result === 1) stats.wins[result]++;
     localStorage.setItem(key, JSON.stringify(stats));
-    if (this.session?.authenticated && this.sdk) {
-      await this.sdk.saves.get("stats");
-      await this.sdk.saves.set("stats", stats);
-      await this.sdk.ui
-        .notify({
-          title: "Partida guardada",
-          message: "Tu progreso está sincronizado con SaltoPlay.",
-          tone: "success",
-          duration: 3500,
-        })
-        .catch(() => {
-          /* Presentation errors do not invalidate a saved match. */
-        });
-    }
     return stats;
   }
 }

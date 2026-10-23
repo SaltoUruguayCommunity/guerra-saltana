@@ -78,8 +78,38 @@ let team = 0,
 let ws: WebSocket | undefined, audio: AudioContext | undefined;
 let peers: Peer[] = [];
 const notice = (t: string) => ($("notice").textContent = t);
-// SaltoPlay is not operational yet. Do not initiate OAuth or anonymous rooms.
-$("login").disabled = true;
+let authInitialization: Promise<void> | undefined;
+function updateAccount(name?: string) {
+  const connected = platform.session?.authenticated === true;
+  $("login").textContent = connected
+    ? "CUENTA CONECTADA ✓"
+    : "CONECTAR CUENTA ↗";
+  $("login").title = connected
+    ? "Cuenta conectada a SaltoUruguayServer"
+    : "Conectar cuenta con SaltoUruguayServer";
+  $("login").disabled = connected;
+  if (name) $("name").value = name;
+}
+function initializeAccount(): Promise<void> {
+  return (authInitialization ??= platform.init().then((name) => {
+    updateAccount(name);
+  }).catch((error) => {
+    authInitialization = undefined;
+    throw error;
+  }));
+}
+$("login").onclick = async () => {
+  $("login").disabled = true;
+  $("login").textContent = "CONECTANDO…";
+  try {
+    await initializeAccount();
+    if (!platform.session?.authenticated) await platform.login();
+  } catch (error) {
+    notice(error instanceof Error ? error.message : "No se pudo conectar la cuenta. Reintentá.");
+  } finally {
+    updateAccount();
+  }
+};
 function effect(key: string, volume: number) {
   if (scene && !mute && !scene.sound.locked) scene.sound.play(key, { volume });
 }
@@ -864,7 +894,7 @@ class Battle extends Phaser.Scene {
       victory.show(state);
       if (state.winner !== -1 && state.winner !== null) effect("victory", 0.55);
       platform.save(state.winner).catch((e) => {
-        this.hud.setText("Resultado local guardado · nube: " + e.message);
+        this.hud.setText("No se pudo guardar el resultado local: " + e.message);
       });
     }
   }
@@ -902,3 +932,7 @@ async function startGame() {
   }
 }
 void startGame();
+void initializeAccount().catch((error) => {
+  updateAccount();
+  notice(error instanceof Error ? error.message : "No se pudo conectar la cuenta. Reintentá.");
+});
