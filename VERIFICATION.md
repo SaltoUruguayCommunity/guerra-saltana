@@ -1,0 +1,24 @@
+# Verificación de esta entrega
+
+- Migración a TypeScript realizada para cliente, simulación, servidor, scripts, configuración Vite y pruebas. Configuración `strict: true`, sin `ts-nocheck` ni desactivación de errores de los archivos propios.
+- Dependencias TypeScript y declaraciones instaladas; lockfile actualizado. `pnpm-workspace.yaml` usa `allowBuilds` de pnpm 11 para permitir únicamente el script de esbuild. Instalación completada correctamente.
+- Arte v2 generado mediante la herramienta integrada ImageGen: personajes, fondo y logo. Originales y prompts guardados en `public/assets/source/`. Preparación técnica de atlas PNG/JSON de 12 frames, retrato y texturas ejecutada correctamente.
+- `pnpm run typecheck`: comprobación estricta de todo el proyecto completada correctamente, incluidas las pruebas.
+- `pnpm run build`: compilación de producción TypeScript completada. Advertencias de tamaño del bundle Phaser y script clásico del SDK copiado como archivo público.
+- Suite `pnpm test`: cinco pruebas aprobadas (turnos y valores inválidos, destrucción y daño, determinismo, victoria, y dos clientes con reconexión). El test de red verifica además la reserva del despliegue, reloj inicial en 45 segundos y rechazo de un disparo prematuro. La prueba WebSocket necesitó ejecución fuera del sandbox por EACCES del puerto local y pasó con autorización.
+- Revisión visual v2 realizada en el navegador integrado sobre la instancia existente de Vite: menú sin scroll en la vista comprobada, inicio de batalla local, seis personajes, HUD sobre canvas, disparo y cambio de turno. Capturas en `docs/`. No se probó un dispositivo móvil físico ni toda la matriz de resoluciones.
+- Revisión v3 en navegador: nueva mesa de operaciones, tags Press Start 2P locales y fuente cargada antes de crear la escena. CSS declarado en el HTML sin import desde TypeScript, canvas transparente durante la carga. Control de potencia comprobado con E sostenida (65% → 89% y límite 100%), Q sostenida (límite 20%) y + (20% → 21%). Capturas `docs/menu-v3.png` y `docs/battle-v3.png`.
+- Revisión militar: paneles oliva con biseles y esquinas pixel, títulos Press Start 2P, sin serifas ni papel. Menú, ayuda y combate revisados visualmente en el navegador integrado. Capturas `docs/menu-military.png` y `docs/battle-military.png`.
+- Pantalla de carga: observada al 100% durante la transición; después desaparece y permite iniciar una batalla local. Diseño inicial revisado y capturado en `docs/loading-screen.png` mediante `docs/loading-preview.html` (vista estática del mismo HTML inicial, sin simular avance). Formato, TypeScript y build comprobados. El error de recursos y el botón de reintento están implementados, pero no se verificaron mediante una falla de red inducida.
+- OAuth y guardado remoto requieren un cliente registrado y sesión real; no se verificaron contra producción. El contrato usado sí fue leído del SDK y de la documentación locales del portal.
+- No se desplegó el juego ni su servidor. Las salas existen sólo en memoria del proceso Node.
+
+Antes de publicar, comprobar multijugador en dos navegadores y controles en un dispositivo móvil físico. La presentación del despliegue agrega `deploymentMs` a las instantáneas y una reserva temporal en el servidor; es necesario reiniciar el backend existente para usarla.
+
+- Atlas UI generado y preparado; MP3 copiado con SHA256 idéntico al original. Phaser carga y decodifica el audio sin errores de consola; interruptor SONIDO ON comprobado en navegador. TypeScript y build aprobados. No se realizó una evaluación auditiva del archivo mediante las herramientas.
+
+- Aviso real observado después de un disparo con Chumbo: turno 05 → 06, equipo Los Cítricos, silbato animado y daño aplicado (279 PV celestes). Captura docs/turn-whistle.png.
+
+- Revisión audio: inicio local con SONIDO ON y disparo Chumbo observados (300 → 285 PV). Sin errores de consola al cargar los tres MP3. Menú con SaltoPlay y salas deshabilitados, captura docs/saltoplay-coming-soon.png. Build y TypeScript aprobados. Cuatro pruebas de simulación pasan; la nueva prueba de rechazo de salas no pudo conectar por EACCES del sandbox y no se autorizó la ejecución ampliada. La prueba anterior de salas se conserva fuera de la suite en test/network.future.ts. El backend ya abierto necesita reinicio para aplicar el bloqueo del servidor.
+
+- Victoria: cámara acerca y encuadra supervivientes con límites horizontales del terreno, anuncio grande separado del HUD, confeti por equipo y audio victory.mp3 una sola vez. Build aprobado y cuatro pruebas de simulación pasan. Revisión visual con un escenario temporal de QA que elimina al rival al iniciar; usa el mismo código de cámara y cierre, sin recorrer una partida completa. Reinicio observado y consola sin errores. Archivos temporales retirados; captura docs/victory.png. Sonido cargado y flujo ejecutado con SONIDO ON en la primera revisión; no se evaluó auditivamente.

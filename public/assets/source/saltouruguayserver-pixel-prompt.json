@@ -1,0 +1,5 @@
+{
+  "mode": "built-in image_gen",
+  "source": "https://saltouruguayserver.com/images/logo_salto.webp",
+  "prompt": "Use case: style-transfer. Edit target: the attached official SaltoUruguayServer logo, a tall interlocking angular S and U monogram. Create a faithful pixel-art adaptation for a small videogame publisher badge. Preserve the exact outer silhouette, recognizable interlocking letter shapes, tall aspect ratio, cobalt blue interiors and purple/violet thick border. Simplify the tiny photographic collage inside into readable dark blue pixel clusters with cyan highlights; do not invent new imagery or words. Deliberately stair-step the outlines on a consistent pixel grid; design it as approximately 48 pixels wide by 64 pixels tall, then show with sharp integer nearest-neighbor enlargement. Preserve the recognizable letter geometry rather than rounding or reinterpreting it. Flat crisp pixels, no antialiasing, no glow, no gradients that smear pixels. Transparent background, no shadow outside the mark, no frame, no added text, no watermark. This is a logo adaptation, not a new logo or a poster. Keep the original purple and blue brand colors."
+}

@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#101c2b" />
+    <title>Guerra Saltana · SaltoUruguayServer</title>
+    <link
+      rel="preload"
+      href="./fonts/press-start-2p-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="/src/theme.css" />
+  </head>
+  <body>
+    <section
+      id="deployment-screen"
+      class="deployment-screen"
+      aria-label="Despliegue de equipos"
+      hidden
+    >
+      <div class="deployment-shutter shutter-top"></div>
+      <div class="deployment-shutter shutter-bottom"></div>
+      <div class="deployment-brief">
+        <p class="deployment-location">COSTANERA DE SALTO</p>
+        <h2>OPERACIÓN NARANJA</h2>
+        <div class="deployment-teams">
+          <div class="deployment-team celeste">
+            <img
+              src="./assets/capy-portrait-v2.png"
+              alt="Brigada Celeste"
+            /><span>LOS CELESTES</span><small>3 CARPINCHOS</small>
+          </div>
+          <span class="deployment-versus">VS</span>
+          <div class="deployment-team citrica">
+            <img src="./assets/capy-orange-v3.png" alt="Brigada Cítrica" /><span
+              >LOS CÍTRICOS</span
+            ><small>3 CARPINCHOS</small>
+          </div>
+        </div>
+        <p
+          id="deployment-count"
+          class="deployment-count"
+          role="status"
+          aria-live="polite"
+        >
+          3
+        </p>
+        <span class="deployment-note"
+          >Calculá el viento. Defendé la costa.</span
+        >
+      </div>
+    </section>
+    <section
+      id="loading-screen"
+      class="loading-screen"
+      aria-label="Cargando Guerra Saltana"
+    >
+      <div class="loading-panel">
+        <div class="loading-unit">
+          <img
+            src="./assets/saltouruguayserver-pixel.png"
+            width="48"
+            height="64"
+            alt="SaltoUruguayServer"
+          /><span
+            >SALTOURUGUAYSERVER<br /><small>BRIGADA DEL LITORAL</small></span
+          >
+        </div>
+        <div class="loading-insignia" aria-hidden="true">
+          <span>★</span><i></i><i></i><i></i>
+        </div>
+        <h1>GUERRA<br />SALTANA</h1>
+        <p class="loading-subtitle">Preparando el despliegue</p>
+        <div class="loading-meter-heading">
+          <span id="loading-stage" role="status" aria-live="polite"
+            >Iniciando comunicaciones…</span
+          ><output id="loading-percent">0%</output>
+        </div>
+        <div
+          id="loading-progress"
+          class="loading-progress"
+          role="progressbar"
+          aria-label="Carga de recursos"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+        >
+          <span id="loading-fill"></span>
+        </div>
+        <div class="loading-checks" aria-hidden="true">
+          <span id="loading-font-check">□ FUENTE</span
+          ><span id="loading-assets-check">□ ARSENAL</span
+          ><span id="loading-scene-check">□ TERRENO</span>
+        </div>
+        <p class="loading-tip">
+          Q / E regulan la potencia.<br />El viento también juega.
+        </p>
+        <button id="loading-retry" hidden>REINTENTAR CARGA</button>
+      </div>
+      <span class="loading-footer">COSTANERA DE SALTO / OPERACIÓN NARANJA</span>
+      <noscript>Activá JavaScript para cargar Guerra Saltana.</noscript>
+    </section>
+    <div id="app" class="is-menu" inert aria-busy="true">
+      <div
+        id="turn-announcement"
+        class="turn-announcement"
+        role="status"
+        aria-live="polite"
+        hidden
+      >
+        <span class="whistle-sprite" aria-hidden="true"></span>
+        <div>
+          <small>CAMBIO DE TURNO</small
+          ><strong id="turn-announcement-title">LOS CELESTES</strong
+          ><span id="turn-announcement-number">TURNO 02</span>
+        </div>
+      </div>
+      <section
+        id="victory-screen"
+        class="victory-screen"
+        role="status"
+        aria-live="polite"
+        hidden
+      >
+        <div id="victory-confetti" aria-hidden="true"></div>
+        <div class="victory-banner">
+          <span class="victory-kicker"
+            >OPERACIÓN NARANJA · MISIÓN CUMPLIDA</span
+          >
+          <h2 id="victory-title">¡VICTORIA!</h2>
+          <strong id="victory-team"></strong>
+          <p id="victory-detail"></p>
+        </div>
+      </section>
+      <div id="game" aria-label="Campo de batalla de Guerra Saltana"></div>
+      <div class="screen-shade"></div>
+      <header class="topbar">
+        <div class="header-identity">
+          <a
+            class="publisher-brand"
+            href="https://saltouruguayserver.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="SaltoUruguayServer, abrir sitio oficial"
+          >
+            <img
+              src="./assets/saltouruguayserver-pixel.png"
+              width="48"
+              height="64"
+              alt="SaltoUruguayServer"
+            />
+          </a>
+          <a class="wordmark" href="./" aria-label="Guerra Saltana, inicio"
+            >GUERRA SALTANA<small>por SaltoUruguayServer</small></a
+          >
+        </div>
+        <div class="top-controls">
+          <span id="connection">MODO LOCAL</span
+          ><button
+            id="fullscreen"
+            title="Pantalla completa"
+            aria-label="Pantalla completa"
+          >
+            ⛶</button
+          ><button id="sound" title="Activar sonido">SONIDO OFF</button
+          ><button id="login" disabled title="SaltoPlay aún no está operativo">
+            CONECTAR CUENTA ↗
+          </button>
+        </div>
+      </header>
+      <div id="overlay" class="overlay">
+        <div class="field-title">
+          <span class="eyebrow">SALTO, URUGUAY / 32° S · 57° O</span>
+          <h1>GUERRA<br /><em>SALTANA.</em></h1>
+          <p>El río tranquilo.<br />La tropa, no.</p>
+          <span class="field-coordinate">BRIGADA DEL LITORAL</span>
+        </div>
+        <div class="troop-display" aria-hidden="true">
+          <span class="troop-orbit"></span
+          ><img
+            class="trooper blue-trooper"
+            src="./assets/capy-portrait-v2.png"
+            alt=""
+          /><img
+            class="trooper orange-trooper"
+            src="./assets/capy-orange-v3.png"
+            alt=""
+          /><span class="troop-caption">LA BRIGADA ESTÁ PRONTA.</span>
+        </div>
+        <section class="operations" aria-label="Preparar batalla">
+          <div class="operations-heading">
+            <span class="operation-stamp">GS</span>
+            <div>
+              <span class="eyebrow">PREPARAR DESPLIEGUE</span>
+              <h2>Cuartel del litoral</h2>
+            </div>
+            <span class="operation-meta">TRES CARPINCHOS.<br />UNA COSTA.</span>
+          </div>
+          <div class="operations-grid">
+            <div class="identity-field">
+              <label for="name">AL FRENTE DE LA BRIGADA</label
+              ><input
+                id="name"
+                maxlength="20"
+                value="Capitán del litoral"
+                autocomplete="nickname"
+              /><button id="controls" class="text-button">
+                Manual del recluta
+              </button>
+            </div>
+            <div class="deployment">
+              <button id="local" class="deploy-button">
+                <span class="deploy-icon">↔</span
+                ><span
+                  ><b>BATALLA LOCAL</b
+                  ><small>Pasá el teclado. Desafiá a tu compañero.</small></span
+                ><span>→</span></button
+              ><button id="create" class="deploy-button online" disabled>
+                <span class="deploy-icon">⌁</span
+                ><span
+                  ><b>ONLINE · PRÓXIMAMENTE</b
+                  ><small>Requiere cuenta conectada a SaltoPlay.</small></span
+                ><span>→</span>
+              </button>
+            </div>
+            <div class="join-field">
+              <label for="code">SALTOPLAY · PRÓXIMAMENTE</label>
+              <div class="join-row">
+                <input
+                  id="code"
+                  disabled
+                  maxlength="6"
+                  placeholder="CÓDIGO"
+                  aria-label="Código de sala"
+                /><button id="join" disabled aria-label="Unirme a la sala">
+                  ENTRAR →
+                </button>
+              </div>
+              <label class="public-option"
+                ><input id="public" type="checkbox" disabled /> Al habilitarse,
+                mostrar mi sala en el listado</label
+              >
+            </div>
+          </div>
+          <div class="operations-bottom">
+            <p id="notice" role="status">
+              Elegí tu frente. Nosotros ponemos las naranjas.
+            </p>
+            <span>TERRENO DESTRUCTIBLE / CERO EXCUSAS</span>
+          </div>
+          <div id="rooms" aria-label="Salas públicas disponibles"></div>
+        </section>
+      </div>
+      <section class="battle-ui" aria-label="Controles de combate">
+        <div
+          id="battle-message"
+          class="battle-message"
+          role="status"
+          hidden
+        ></div>
+        <div class="battle-top">
+          <div class="team-hud blue">
+            <small>BRIGADA CELESTE</small
+            ><strong id="blue-health">300 <span>PV</span></strong>
+            <div class="health-track"><i id="blue-bar"></i></div>
+          </div>
+          <div class="turn-hud">
+            <small id="turn-label">TURNO 01</small>
+            <h2 id="turn-name">Los Celestes</h2>
+            <span id="timer">45</span>
+          </div>
+          <div class="team-hud orange">
+            <small>BRIGADA CÍTRICA</small
+            ><strong id="orange-health">300 <span>PV</span></strong>
+            <div class="health-track"><i id="orange-bar"></i></div>
+          </div>
+        </div>
+        <div class="command">
+          <div class="weapons">
+            <button
+              data-weapon="0"
+              class="selected"
+              aria-label="Naranjazo, 42 de daño"
+            >
+              <span class="weapon-art orange-projectile"></span
+              ><span>NARANJAZO<small>42 DAÑO</small></span
+              ><kbd>1</kbd></button
+            ><button
+              data-weapon="1"
+              aria-label="Mate bomba, 62 de daño, rebota"
+            >
+              <span class="weapon-art mate-projectile"></span
+              ><span>MATE BOMBA<small>62 DAÑO · REBOTA</small></span
+              ><kbd>2</kbd></button
+            ><button data-weapon="2" aria-label="Chumbo, 28 de daño, veloz">
+              <span class="weapon-art bullet-projectile"></span
+              ><span>CHUMBO<small>28 DAÑO · VELOZ</small></span
+              ><kbd>3</kbd>
+            </button>
+          </div>
+          <div class="firebox">
+            <label for="power"
+              >POTENCIA <span class="power-shortcut">Q − / E +</span>
+              <output id="power-value">65%</output></label
+            ><input
+              id="power"
+              type="range"
+              min="20"
+              max="100"
+              value="65"
+            /><button id="fire">DISPARAR <kbd>ESPACIO</kbd></button>
+          </div>
+        </div>
+        <div class="battle-footer">
+          <span
+            >← → MOVER &nbsp; W SALTAR &nbsp; ↑ ↓ APUNTAR &nbsp; Q E
+            POTENCIA</span
+          ><button id="restart">↻ NUEVA PARTIDA</button
+          ><span id="wind">VIENTO → 0</span>
+        </div>
+        <div class="touch">
+          <button data-key="left" aria-label="Mover a la izquierda">◀</button
+          ><button data-key="right" aria-label="Mover a la derecha">▶</button
+          ><button data-key="jump">SALTAR</button
+          ><button data-key="up" aria-label="Subir ángulo">↖</button
+          ><button data-key="down" aria-label="Bajar ángulo">↘</button>
+        </div>
+      </section>
+      <dialog id="help">
+        <button id="close-help" aria-label="Cerrar controles">✕</button
+        ><span class="panel-kicker">MANUAL DEL RECLUTA</span>
+        <h2>Apuntá. Calculá. Dispará.</h2>
+        <p>
+          <kbd>A D</kbd> o <kbd>← →</kbd> para moverte. <kbd>W</kbd> para
+          saltar. Ratón o <kbd>↑ ↓</kbd> para apuntar. Regulá la potencia con
+          <kbd>Q / E</kbd> (mantené para ajustar) o <kbd>− / +</kbd> (un punto).
+          También podés usar el deslizador; después dispará con
+          <kbd>ESPACIO</kbd>.
+        </p>
+        <p>
+          Tenés 45 segundos y movimiento limitado por turno. El mate bomba
+          rebota; el naranjazo explota al impacto; el chumbo viaja más rápido.
+          Gana el último equipo con carpinchos vivos.
+        </p>
+        <p>
+          En móvil, tocá el escenario para apuntar y usá los botones. Para jugar
+          online estará disponible próximamente y requerirá una cuenta conectada
+          a SaltoPlay.
+        </p>
+      </dialog>
+    </div>
+    <script src="./sdk/saltoplay.js"></script>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
