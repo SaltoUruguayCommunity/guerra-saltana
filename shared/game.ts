@@ -34,7 +34,20 @@ export const WEAPONS: readonly Weapon[] = [
     gravity: 65,
     bounce: 0,
   },
+  {
+    name: "Tero-Bomba",
+    damage: 70,
+    radius: 40,
+    speed: 0,
+    gravity: 150,
+    bounce: 0,
+    cooldown: 3,
+  },
 ];
+export const TERO_WEAPON = 3;
+export function teroCooldown(s: GameState, team = s.team): number {
+  return Math.max(0, Math.ceil((s.teroReadyTurn[team] - s.turn) / 2));
+}
 export function groundHeight(x: number) {
   return Math.round(
     241 +
@@ -74,6 +87,8 @@ export function createGame(seed = 123): GameState {
     seed,
     phase: "aim",
     projectile: null,
+    airstrike: null,
+    teroReadyTurn: [0, 0],
     explosions: [],
     event: 0,
     winner: null,
@@ -121,6 +136,23 @@ export function command(s: GameState, team: number, input: unknown) {
       !WEAPONS[a.weapon]
     )
       return false;
+    if (a.weapon === TERO_WEAPON) {
+      if (teroCooldown(s) > 0 || typeof a.targetX !== "number" || !Number.isFinite(a.targetX)) return false;
+      const direction = s.team === 0 ? 1 : -1;
+      s.airstrike = {
+        x: direction === 1 ? -48 : W + 48,
+        y: 48,
+        targetX: Math.max(20, Math.min(W - 20, a.targetX)),
+        direction,
+        age: 0,
+        dropped: false,
+      };
+      s.teroReadyTurn[s.team] = s.turn + WEAPONS[TERO_WEAPON].cooldown! * 2;
+      u.vx = 0;
+      u.anim = "shoot";
+      s.phase = "flight";
+      return true;
+    }
     const angle = Math.max(-Math.PI, Math.min(0, a.angle));
     const weapon = WEAPONS[a.weapon],
       speed = weapon.speed * Math.max(0.2, Math.min(1, a.power));
@@ -202,11 +234,22 @@ export function nextTurn(s: GameState) {
   s.travel = 0;
   s.wind = (((s.seed + s.turn * 7) % 19) - 9) * 1.5;
   s.phase = "aim";
+  s.airstrike = null;
   for (const u of s.units) u.vx = 0;
 }
 export function step(s: GameState, dt = DT) {
   if (s.phase === "over") return;
   s.tick++;
+  if (s.airstrike) {
+    const bird = s.airstrike;
+    bird.age += dt;
+    bird.x += bird.direction * 200 * dt;
+    if (!bird.dropped && (bird.x - bird.targetX) * bird.direction >= 0) {
+      bird.dropped = true;
+      s.projectile = { x: bird.targetX, y: bird.y + 16, vx: 0, vy: 25, weapon: TERO_WEAPON, age: 0, bounces: 0 };
+    }
+    if (bird.x < -80 || bird.x > W + 80) s.airstrike = null;
+  }
   for (const u of s.units) {
     if (u.hp <= 0) {
       u.anim = "dead";

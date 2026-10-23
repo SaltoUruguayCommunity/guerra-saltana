@@ -18,6 +18,7 @@ export interface Weapon {
   speed: number;
   gravity: number;
   bounce: number;
+  cooldown?: number;
 }
 export interface Projectile {
   x: number;
@@ -46,6 +47,8 @@ export interface GameState {
   seed: number;
   phase: "aim" | "flight" | "settle" | "over";
   projectile: Projectile | null;
+  airstrike: { x: number; y: number; targetX: number; direction: number; age: number; dropped: boolean } | null;
+  teroReadyTurn: [number, number];
   explosions: Explosion[];
   event: number;
   winner: Team | -1 | null;
@@ -66,6 +69,7 @@ export type Action =
       angle: number;
       power: number;
       weapon: number;
+      targetX?: number;
     };
 export type GameSnapshot = Omit<GameState, "terrain"> & {
   terrain?: undefined;

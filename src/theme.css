@@ -841,7 +841,7 @@ canvas {
   gap: 5px;
 }
 .weapons button {
-  min-width: 142px;
+  min-width: 130px;
   display: flex;
   align-items: center;
   gap: 9px;
@@ -887,6 +887,22 @@ canvas {
   width: 25px;
   height: 25px;
   flex-shrink: 0;
+}
+.tero-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.weapon-cooldown {
+  position: absolute;
+  left: 3px;
+  bottom: 3px;
+  padding: 1px 4px;
+  background: #17281b;
+  border: 1px solid var(--brass);
+  color: #fff0b8;
+  font-size: 8px;
 }
 .orange-projectile {
   background: #eb9d38;

@@ -5,6 +5,9 @@ import {
   step,
   active,
   WEAPONS,
+  TERO_WEAPON,
+  teroCooldown,
+  solid,
   W,
   H,
   DT,
@@ -53,6 +56,7 @@ function $<K extends string>(
       : HTMLElement;
 }
 const platform = new Platform();
+let airTargetX = 475;
 const help = document.getElementById("help") as HTMLDialogElement;
 $("controls").onclick = () => help.showModal();
 $("close-help").onclick = () => help.close();
@@ -347,6 +351,7 @@ document.querySelectorAll<HTMLButtonElement>("[data-weapon]").forEach(
       document
         .querySelectorAll<HTMLButtonElement>("[data-weapon]")
         .forEach((x) => x.classList.toggle("selected", x === b));
+      if (weapon === TERO_WEAPON) notice("Marcá el objetivo con el ratón o tocando el terreno. ↑ ↓ lo desplazan; ESPACIO llama al tero.");
     }),
 );
 function setPower(value: number) {
@@ -369,6 +374,7 @@ function canAdjustPower() {
     !deployment.active &&
     mode !== "menu" &&
     state.phase === "aim" &&
+    weapon !== TERO_WEAPON &&
     (mode === "local" ||
       (team === state.team && started && peers.every((p) => p.connected))) &&
     !help.open &&
@@ -395,7 +401,11 @@ window.addEventListener("keyup", (event) => powerKeys.delete(event.code));
 window.addEventListener("blur", () => powerKeys.clear());
 function fire() {
   if (mode === "menu") return;
-  act({ type: "fire", angle, power, weapon });
+  if (weapon === TERO_WEAPON && teroCooldown(state) > 0) {
+    notice(`Tero-Bomba recargando: ${teroCooldown(state)} turno(s) propios.`);
+    return;
+  }
+  act({ type: "fire", angle, power, weapon, targetX: airTargetX });
   tone(260, 0.13);
 }
 $("fire").onclick = fire;
@@ -439,6 +449,9 @@ class Battle extends Phaser.Scene {
     Phaser.Input.Keyboard.Key
   >;
   parts: Particle[] = [];
+  tero!: Phaser.GameObjects.Sprite;
+  teroBomb!: Phaser.GameObjects.Image;
+  carriedBomb!: Phaser.GameObjects.Image;
   preload() {
     loading.update(10, "Abriendo el arsenal…");
     this.load.on("progress", (progress: number) =>
@@ -462,6 +475,7 @@ class Battle extends Phaser.Scene {
     this.load.image("river", "assets/river-v2.png");
     this.load.image("soil", "assets/soil-v2.png");
     this.load.atlas("ui", "assets/ui-atlas.png", "assets/ui-atlas.json");
+    this.load.atlas("tero", "assets/tero-atlas-v1.png", "assets/tero-atlas-v1.json");
     this.load.audio("turn-whistle", "audio/turn-change.mp3");
     this.load.audio("countdown-tick", "audio/countdown-tick.mp3");
     this.load.audio("explosion", "audio/explosion.mp3");
@@ -473,7 +487,7 @@ class Battle extends Phaser.Scene {
     scene = this;
     this.sound.mute = mute;
     this.cameras.main.roundPixels = true;
-    for (const key of ["soldiers", "coast", "river", "soil", "ui"])
+    for (const key of ["soldiers", "coast", "river", "soil", "ui", "tero"])
       this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
     this.paintBackground();
     for (let t = 0; t < 2; t++)
@@ -524,6 +538,11 @@ class Battle extends Phaser.Scene {
         .setDepth(5),
     );
     this.fx = this.add.graphics().setDepth(6);
+    this.anims.create({ key: "tero-fly", frames: ["wings-up", "glide", "wings-down", "glide"].map(frame => ({ key: "tero", frame })), frameRate: 8, repeat: -1 });
+    this.tero = this.add.sprite(0, 0, "tero", "glide").setOrigin(0.5, 80 / 128).setDisplaySize(86, 86).setDepth(7).setVisible(false);
+    this.tero.play("tero-fly");
+    this.teroBomb = this.add.image(0, 0, "tero", "bomb").setDisplaySize(26, 26).setDepth(7).setVisible(false);
+    this.carriedBomb = this.add.image(0, 0, "tero", "bomb").setDisplaySize(26, 26).setDepth(6).setVisible(false);
     this.hud = this.add
       .text(320, 28, "", {
         fontFamily: "monospace",
@@ -548,7 +567,7 @@ class Battle extends Phaser.Scene {
       if (!e.repeat) act({ type: "jump" });
     });
     keyboard.on("keydown", (e: KeyboardEvent) => {
-      if (["1", "2", "3"].includes(e.key)) {
+      if (["1", "2", "3", "4"].includes(e.key)) {
         const button = document.querySelector<HTMLButtonElement>(
           `[data-weapon="${Number(e.key) - 1}"]`,
         );
@@ -577,6 +596,10 @@ class Battle extends Phaser.Scene {
   aim(p: Phaser.Input.Pointer) {
     const world = this.cameras.main.getWorldPoint(p.x, p.y),
       u = active(state);
+    if (weapon === TERO_WEAPON) {
+      airTargetX = Phaser.Math.Clamp(world.x, 20, W - 20);
+      return;
+    }
     angle = Phaser.Math.Clamp(
       Math.atan2(Math.min(-2, world.y - u.y), world.x - u.x),
       -Math.PI,
@@ -702,7 +725,10 @@ class Battle extends Phaser.Scene {
       act({ type: "move", dir });
       lastDir = dir;
     }
-    if (mine) {
+    if (mine && weapon === TERO_WEAPON) {
+      if (this.keys.UP.isDown || touch.up) airTargetX = Math.max(20, airTargetX - delta * 0.12);
+      if (this.keys.DOWN.isDown || touch.down) airTargetX = Math.min(W - 20, airTargetX + delta * 0.12);
+    } else if (mine) {
       if (this.keys.UP.isDown || touch.up)
         angle = Math.max(-Math.PI, angle - delta * 0.001);
       if (this.keys.DOWN.isDown || touch.down)
@@ -711,6 +737,7 @@ class Battle extends Phaser.Scene {
     if (state.turn !== lastTurn) {
       const forward = state.turn > lastTurn;
       angle = state.team ? -2.4 : -0.7;
+      airTargetX = state.team ? 165 : 475;
       lastTurn = state.turn;
       if (
         forward &&
@@ -777,7 +804,15 @@ class Battle extends Phaser.Scene {
         this.fx.fillRect(c.x - 12, c.y - 38, (24 * c.hp) / 100, 2);
       }
     }
-    if (state.phase === "aim" && mode !== "menu") {
+    if (state.phase === "aim" && mode !== "menu" && weapon === TERO_WEAPON) {
+      let targetY = 0;
+      while (targetY < H && !solid(state, airTargetX, targetY)) targetY++;
+      this.fx.lineStyle(1, teroCooldown(state) ? 0x9b9b78 : 0xffd36c, 0.8);
+      this.fx.lineBetween(airTargetX, 65, airTargetX, targetY);
+      this.fx.strokeCircle(airTargetX, targetY, 10);
+      this.fx.lineBetween(airTargetX - 15, targetY, airTargetX + 15, targetY);
+      this.fx.lineBetween(airTargetX, targetY - 15, airTargetX, targetY + 15);
+    } else if (state.phase === "aim" && mode !== "menu") {
       this.fx.lineStyle(1, 0xffefb0, 0.6);
       let px = u.x,
         py = u.y - 5,
@@ -796,11 +831,21 @@ class Battle extends Phaser.Scene {
       this.fx.fillStyle(0xffd36c);
       this.fx.fillTriangle(u.x - 4, u.y - 76, u.x + 4, u.y - 76, u.x, u.y - 70);
     }
-    if (state.projectile) {
+    const bird = state.airstrike;
+    this.tero.setVisible(!menu && Boolean(bird));
+    this.carriedBomb.setVisible(!menu && Boolean(bird && !bird.dropped));
+    if (bird) {
+      this.tero.setPosition(bird.x, bird.y).setFlipX(bird.direction < 0);
+      this.carriedBomb.setPosition(bird.x, bird.y + 15).setAngle(-bird.direction * 70);
+    }
+    const bomb = state.projectile?.weapon === TERO_WEAPON ? state.projectile : null;
+    this.teroBomb.setVisible(!menu && Boolean(bomb));
+    if (bomb) this.teroBomb.setPosition(bomb.x, bomb.y).setRotation(Math.atan2(bomb.vy, bomb.vx) - Math.PI / 2);
+    if (state.projectile && !bomb) {
       const p = state.projectile;
       this.fx.fillStyle(0xfff0b9).fillCircle(p.x, p.y, 4);
       this.fx
-        .fillStyle(weapon === 1 ? 0x775039 : 0xffa839)
+        .fillStyle(p.weapon === 1 ? 0x775039 : 0xffa839)
         .fillCircle(p.x, p.y, 3);
     }
     for (const e of state.explosions)
@@ -900,7 +945,9 @@ class Battle extends Phaser.Scene {
             ? "PAUSA · ESPERANDO RECONEXIÓN"
             : `TURNO ${state.turn}  ·  ${state.team ? "CÍTRICOS" : "CELESTES"}  ·  ${state.phase === "flight" ? "¡AHÍ VA!" : state.phase === "settle" ? "IMPACTO" : mine ? "TU TURNO" : "TURNO RIVAL"}`,
     );
-    $("battle-message").textContent = this.hud.text;
+    $("battle-message").textContent = state.airstrike && state.phase === "flight"
+      ? state.airstrike.dropped ? "TERO-BOMBA · ¡BOMBA FUERA!" : "TERO-BOMBA · APOYO AÉREO EN CAMINO"
+      : this.hud.text;
     $("turn-label").textContent =
       `TURNO ${String(state.turn).padStart(2, "0")} / ${mode === "online" ? peers[state.team]?.name || "Esperando" : "PARTIDA LOCAL"}`;
     $("turn-name").textContent = state.team ? "Los Cítricos" : "Los Celestes";
@@ -908,11 +955,23 @@ class Battle extends Phaser.Scene {
     $("wind").textContent =
       `VIENTO ${state.wind < 0 ? "←" : "→"} ${Math.abs(state.wind).toFixed(0)} km/h`;
     $("wind").classList.toggle("wind-left", state.wind < 0);
+    const cooldown = teroCooldown(state);
+    const teroButton = document.querySelector<HTMLButtonElement>('[data-weapon="3"]')!;
+    teroButton.disabled = cooldown > 0;
+    teroButton.title = cooldown ? `Tero-Bomba: faltan ${cooldown} turno(s) propios` : "Tero-Bomba listo · 70 de daño · recarga de 3 turnos propios";
+    $("tero-status").textContent = cooldown ? `RECARGA · ${cooldown} TURNOS` : "70 DAÑO · LISTO";
+    $("tero-cooldown").hidden = cooldown === 0;
+    $("tero-cooldown").textContent = String(cooldown);
+    $("power").disabled = weapon === TERO_WEAPON;
+    $("power-label").textContent = weapon === TERO_WEAPON ? "OBJETIVO" : "POTENCIA";
+    $("power-value").textContent = weapon === TERO_WEAPON ? `${Math.round(airTargetX / W * 100)}% MAPA` : `${Math.round(power * 100)}%`;
+    $("power-shortcuts").hidden = weapon === TERO_WEAPON;
     $("fire").disabled =
       deployment.active ||
       mode === "menu" ||
       !mine ||
       state.phase !== "aim" ||
+      (weapon === TERO_WEAPON && cooldown > 0) ||
       (mode === "online" && (!started || peers.some((p) => !p.connected)));
     if (state.phase === "over" && !won) {
       won = true;

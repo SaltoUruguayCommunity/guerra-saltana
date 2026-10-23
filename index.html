@@ -310,10 +310,16 @@
               ><span>CHUMBO<small>28 DAÑO · VELOZ</small></span
               ><kbd>3</kbd>
             </button>
+            <button data-weapon="3" aria-label="Tero-Bomba, ataque aéreo, 70 de daño, recarga de tres turnos propios">
+              <img class="weapon-art tero-icon" src="./assets/tero-icon-v1.png" alt="" width="32" height="32" />
+              <span>TERO-BOMBA<small id="tero-status">70 DAÑO · LISTO</small></span>
+              <span id="tero-cooldown" class="weapon-cooldown" hidden aria-hidden="true"></span>
+              <kbd>4</kbd>
+            </button>
           </div>
           <div class="firebox">
             <label for="power"
-              >POTENCIA <span class="power-shortcut">Q − / E +</span>
+              ><span id="power-label">POTENCIA</span> <span id="power-shortcuts" class="power-shortcut">Q − / E +</span>
               <output id="power-value">65%</output></label
             ><input
               id="power"
@@ -353,6 +359,10 @@
         <p>
           Tenés 45 segundos y movimiento limitado por turno. El mate bomba
           rebota; el naranjazo explota al impacto; el chumbo viaja más rápido.
+          Con <kbd>4</kbd> elegís Tero-Bomba: marcá el punto con el ratón o
+          tocando el terreno (↑ ↓ lo desplazan) y dispará para llamar al tero.
+          Suelta una bomba de hasta 70 de daño y recarga durante tres turnos
+          propios de tu equipo. La potencia no se usa en este ataque.
           Gana el último equipo con carpinchos vivos.
         </p>
         <p>
