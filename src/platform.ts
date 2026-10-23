@@ -21,21 +21,30 @@ export class Platform {
             transport: "external",
             apiOrigin: "https://play.saltouruguayserver.com",
             clientId,
+            loginMode: "popup",
+            persistence: "session",
             redirectUri:
               import.meta.env.VITE_SALTOPLAY_REDIRECT_URI ||
-              location.origin + "/",
+              new URL("./", location.href).href,
             scopes: [
               "profile:read",
               "saltotag:read",
             ],
           },
     );
+    return this.refreshAccount();
+  }
+  async refreshAccount() {
+    if (!this.sdk) return;
     this.session = await this.sdk.auth.getSession();
+    this.profile = undefined;
     if (this.session.authenticated) {
       const [tag, profile] = await Promise.all([
         this.sdk.player.getSaltoTag().catch(() => null),
         this.sdk.player.getProfile().catch(() => null),
       ]);
+      this.session = await this.sdk.auth.getSession();
+      if (!this.session.authenticated) return;
       this.profile = {
         displayName: profile?.displayName || tag?.displayName || tag?.tag || "Jugador",
         avatar: profile?.avatar ?? null,
@@ -49,6 +58,7 @@ export class Platform {
         "Registrá un cliente OAuth en SaltoUruguayServer y configurá VITE_SALTOPLAY_CLIENT_ID.",
       );
     await this.sdk.auth.login();
+    return this.refreshAccount();
   }
   async save(result: number | null) {
     const key = "guerra-saltana-stats";

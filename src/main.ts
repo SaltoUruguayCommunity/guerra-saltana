@@ -121,10 +121,17 @@ $("login").onclick = async () => {
   $("login").disabled = true;
   $("login").textContent = "CONECTANDO…";
   try {
-    await initializeAccount();
-    if (!platform.session?.authenticated) await platform.login();
+    if (!platform.sdk) await initializeAccount();
+    if (!platform.session?.authenticated) updateAccount(await platform.login());
   } catch (error) {
-    notice(error instanceof Error ? error.message : "No se pudo conectar la cuenta. Reintentá.");
+    const message = error instanceof Error ? error.message : "";
+    const loginErrors: Record<string, string> = {
+      popup_blocked: "El navegador bloqueó la ventana de login. Permití ventanas emergentes para este juego y reintentá.",
+      popup_closed: "Cerraste la ventana de login. Podés volver a conectar tu cuenta.",
+      popup_timeout: "La ventana de login expiró. Reintentá la conexión.",
+      access_denied: "Cancelaste el acceso a tu cuenta.",
+    };
+    notice(loginErrors[message] || message || "No se pudo conectar la cuenta. Reintentá.");
   } finally {
     updateAccount();
   }
@@ -950,8 +957,10 @@ async function startGame() {
     );
   }
 }
-void startGame();
-void initializeAccount().catch((error) => {
-  updateAccount();
-  notice(error instanceof Error ? error.message : "No se pudo conectar la cuenta. Reintentá.");
-});
+if (!window.SaltoPlay?.isOAuthCallback) {
+  void startGame();
+  void initializeAccount().catch((error) => {
+    updateAccount();
+    notice(error instanceof Error ? error.message : "No se pudo conectar la cuenta. Reintentá.");
+  });
+}

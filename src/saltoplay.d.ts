@@ -72,12 +72,15 @@ interface SaltoPlayOptions {
   clientId?: string;
   redirectUri?: string;
   scopes?: string[];
+  loginMode?: "popup" | "redirect";
+  persistence?: "session" | "memory";
   ui?: SaltoUIOptions;
 }
 declare global {
   interface Window {
     SaltoPlay?: {
       version: string;
+      isOAuthCallback?: boolean;
       init(options?: SaltoPlayOptions): Promise<SaltoPlayClient>;
       ui: {
         showWelcome(value: { id?: string; tag?: string; displayName?: string; avatar?: string | null }, options?: { once?: boolean }): string | null;
