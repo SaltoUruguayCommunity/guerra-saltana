@@ -22,7 +22,7 @@ pnpm run build
 pnpm run assets
 ```
 
-Controles: A/D o flechas para mover, W para saltar, ratón o arriba/abajo para apuntar. Q baja la potencia y E la sube (mantener para ajuste continuo, 30 puntos porcentuales por segundo); −/+ ajustan un punto por pulsación o cinco con Shift. El deslizador muestra el mismo valor, limitado entre 20% y 100%. Estos atajos se desactivan fuera del turno de apuntado propio, en menús y mientras se escribe en un campo de texto. Espacio dispara; 1/2/3 cambian arma. Límite de movimiento 85 píxeles por turno; 45 segundos. Naranjazo explota al impacto, mate bomba rebota tres veces, chumbo tiene menor caída. Tres carpinchos por equipo. El agua/borde inferior elimina unidades. Botones táctiles incluidos.
+Controles: A/D o flechas para mover, W para saltar, ratón o arriba/abajo para apuntar. Q baja la potencia y E la sube (mantener para ajuste continuo, 30 puntos porcentuales por segundo); −/+ ajustan un punto por pulsación o cinco con Shift. El deslizador muestra el mismo valor, limitado entre 20% y 100%. Estos atajos se desactivan fuera del turno de apuntado propio, en menús y mientras se escribe en un campo de texto. Espacio dispara; 1/2/3/4 cambian arma. Tero-Bomba (4) permite marcar el objetivo con ratón o toque; arriba/abajo desplazan la marca. No usa potencia: un tero cruza el escenario y suelta una bomba de hasta 70 de daño, radio 40 y cráter. Cada equipo tiene una recarga independiente de tres turnos propios (si dispara en el turno global 1, vuelve a estar listo en el 7). El contador aparece en el botón, también en móvil. Límite de movimiento 85 píxeles por turno; 45 segundos. Naranjazo explota al impacto, mate bomba rebota tres veces, chumbo tiene menor caída. Tres carpinchos por equipo. El agua/borde inferior elimina unidades. Botones táctiles incluidos.
 
 ## Arquitectura y red
 
@@ -65,3 +65,7 @@ Código y arte originales de este proyecto, disponibles para el propietario de S
 ## Estado de SaltoPlay y multijugador
 
 El login con SaltoUruguayServer está habilitado mediante el SDK oficial alojado en el portal. Al completar OAuth en el popup se actualizan nombre y avatar sin recargar la partida. La sesión se restaura al recargar la misma pestaña. El multijugador sigue como Próximamente: sus controles están deshabilitados, el cliente no abre conexiones WebSocket y el servidor rechaza las acciones de salas. Cuando se habilite, será obligatoria una cuenta conectada y su validación en servidor; no basta con una bandera autenticada enviada por el cliente. El protocolo previo queda conservado, con su prueba en test/network.future.ts, fuera de la suite activa hasta implementar esa validación.
+
+## Tero-Bomba: recursos
+
+Sprites generados con la herramienta integrada ImageGen, con transparencia original: tres poses de vuelo de tero y una bomba. Fuente y prompt en `public/assets/source/tero-bomba-imagegen-v1.png` y `tero-bomba-prompt-v1.json`. `pnpm run assets:tero` prepara el atlas `public/assets/tero-atlas-v1.png` y el icono a partir de esa fuente, conservando alfa y muestreo nearest-neighbour; no vuelve a generar imágenes.

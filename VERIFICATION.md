@@ -22,3 +22,11 @@ Antes de publicar, comprobar multijugador en dos navegadores y controles en un d
 - Revisión audio: inicio local con SONIDO ON y disparo Chumbo observados (300 → 285 PV). Sin errores de consola al cargar los tres MP3. Menú con SaltoPlay y salas deshabilitados, captura docs/saltoplay-coming-soon.png. Build y TypeScript aprobados. Cuatro pruebas de simulación pasan; la nueva prueba de rechazo de salas no pudo conectar por EACCES del sandbox y no se autorizó la ejecución ampliada. La prueba anterior de salas se conserva fuera de la suite en test/network.future.ts. El backend ya abierto necesita reinicio para aplicar el bloqueo del servidor.
 
 - Victoria: cámara acerca y encuadra supervivientes con límites horizontales del terreno, anuncio grande separado del HUD, confeti por equipo y audio victory.mp3 una sola vez. Build aprobado y cuatro pruebas de simulación pasan. Revisión visual con un escenario temporal de QA que elimina al rival al iniciar; usa el mismo código de cámara y cierre, sin recorrer una partida completa. Reinicio observado y consola sin errores. Archivos temporales retirados; captura docs/victory.png. Sonido cargado y flujo ejecutado con SONIDO ON en la primera revisión; no se evaluó auditivamente.
+
+## Tero-Bomba — 23/10/2026
+
+- Sprites creados con la herramienta integrada ImageGen; fuente transparente y prompt conservados en public/assets/source/tero-bomba-imagegen-v1.png y tero-bomba-prompt-v1.json. Atlas e icono preparados con pnpm run assets:tero, manteniendo alfa.
+- Ocho pruebas de simulación pasan: armas anteriores, aproximación aérea, caída e impacto, daño/cráter, cooldown por equipo, validación de objetivos y determinismo.
+- pnpm run build y pnpm run typecheck completados. Vite conserva su advertencia del tamaño del bundle Phaser.
+- Comprobación real en navegador: selección de la cuarta arma, vuelo desde ambos lados, bomba visible, impacto (300 → 239 PV), cráter y contador de recarga. Evidencia: docs/tero-bomba-flight.jpg.
+- El multijugador continúa deshabilitado. No se ejecutó la prueba de red ni se desplegó el juego.

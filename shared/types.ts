@@ -47,7 +47,14 @@ export interface GameState {
   seed: number;
   phase: "aim" | "flight" | "settle" | "over";
   projectile: Projectile | null;
-  airstrike: { x: number; y: number; targetX: number; direction: number; age: number; dropped: boolean } | null;
+  airstrike: {
+    x: number;
+    y: number;
+    targetX: number;
+    direction: number;
+    age: number;
+    dropped: boolean;
+  } | null;
   teroReadyTurn: [number, number];
   explosions: Explosion[];
   event: number;

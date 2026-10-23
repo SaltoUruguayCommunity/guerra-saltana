@@ -809,6 +809,7 @@ canvas {
   transform: translateX(-50%);
   display: flex;
   gap: 15px;
+  width: min(860px, calc(100% - 24px));
   align-items: center;
   padding: 12px;
   color: #e1e9c5;
@@ -839,9 +840,12 @@ canvas {
 .weapons {
   display: flex;
   gap: 5px;
+  flex: 1;
+  min-width: 0;
 }
 .weapons button {
-  min-width: 130px;
+  min-width: 0;
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 9px;
@@ -943,6 +947,7 @@ canvas {
 }
 .firebox {
   width: 180px;
+  flex-shrink: 0;
 }
 .firebox label {
   display: block;

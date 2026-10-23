@@ -92,12 +92,19 @@ function updateAccount(name?: string) {
     const displayName = platform.profile?.displayName || "Jugador";
     $("account-name").textContent = displayName;
     $("account").title = `${displayName} · SaltoUruguayServer`;
-    $("account-initial").textContent = Array.from(displayName)[0]?.toUpperCase() || "J";
+    $("account-initial").textContent =
+      Array.from(displayName)[0]?.toUpperCase() || "J";
     const avatar = $("account-avatar") as HTMLImageElement;
     avatar.hidden = true;
     $("account-initial").hidden = false;
-    avatar.onload = () => { avatar.hidden = false; $("account-initial").hidden = true; };
-    avatar.onerror = () => { avatar.hidden = true; $("account-initial").hidden = false; };
+    avatar.onload = () => {
+      avatar.hidden = false;
+      $("account-initial").hidden = true;
+    };
+    avatar.onerror = () => {
+      avatar.hidden = true;
+      $("account-initial").hidden = false;
+    };
     const avatarUrl = platform.profile?.avatar;
     if (avatarUrl && /^https?:\/\//i.test(avatarUrl)) {
       if (avatar.getAttribute("src") !== avatarUrl) avatar.src = avatarUrl;
@@ -114,12 +121,15 @@ function updateAccount(name?: string) {
   if (name) $("name").value = name;
 }
 function initializeAccount(): Promise<void> {
-  return (authInitialization ??= platform.init().then((name) => {
-    updateAccount(name);
-  }).catch((error) => {
-    authInitialization = undefined;
-    throw error;
-  }));
+  return (authInitialization ??= platform
+    .init()
+    .then((name) => {
+      updateAccount(name);
+    })
+    .catch((error) => {
+      authInitialization = undefined;
+      throw error;
+    }));
 }
 $("login").onclick = async () => {
   $("login").disabled = true;
@@ -130,12 +140,18 @@ $("login").onclick = async () => {
   } catch (error) {
     const message = error instanceof Error ? error.message : "";
     const loginErrors: Record<string, string> = {
-      popup_blocked: "El navegador bloqueó la ventana de login. Permití ventanas emergentes para este juego y reintentá.",
-      popup_closed: "Cerraste la ventana de login. Podés volver a conectar tu cuenta.",
+      popup_blocked:
+        "El navegador bloqueó la ventana de login. Permití ventanas emergentes para este juego y reintentá.",
+      popup_closed:
+        "Cerraste la ventana de login. Podés volver a conectar tu cuenta.",
       popup_timeout: "La ventana de login expiró. Reintentá la conexión.",
       access_denied: "Cancelaste el acceso a tu cuenta.",
     };
-    notice(loginErrors[message] || message || "No se pudo conectar la cuenta. Reintentá.");
+    notice(
+      loginErrors[message] ||
+        message ||
+        "No se pudo conectar la cuenta. Reintentá.",
+    );
   } finally {
     updateAccount();
   }
@@ -351,7 +367,10 @@ document.querySelectorAll<HTMLButtonElement>("[data-weapon]").forEach(
       document
         .querySelectorAll<HTMLButtonElement>("[data-weapon]")
         .forEach((x) => x.classList.toggle("selected", x === b));
-      if (weapon === TERO_WEAPON) notice("Marcá el objetivo con el ratón o tocando el terreno. ↑ ↓ lo desplazan; ESPACIO llama al tero.");
+      if (weapon === TERO_WEAPON)
+        notice(
+          "Marcá el objetivo con el ratón o tocando el terreno. ↑ ↓ lo desplazan; ESPACIO llama al tero.",
+        );
     }),
 );
 function setPower(value: number) {
@@ -475,7 +494,11 @@ class Battle extends Phaser.Scene {
     this.load.image("river", "assets/river-v2.png");
     this.load.image("soil", "assets/soil-v2.png");
     this.load.atlas("ui", "assets/ui-atlas.png", "assets/ui-atlas.json");
-    this.load.atlas("tero", "assets/tero-atlas-v1.png", "assets/tero-atlas-v1.json");
+    this.load.atlas(
+      "tero",
+      "assets/tero-atlas-v1.png",
+      "assets/tero-atlas-v1.json",
+    );
     this.load.audio("turn-whistle", "audio/turn-change.mp3");
     this.load.audio("countdown-tick", "audio/countdown-tick.mp3");
     this.load.audio("explosion", "audio/explosion.mp3");
@@ -538,11 +561,32 @@ class Battle extends Phaser.Scene {
         .setDepth(5),
     );
     this.fx = this.add.graphics().setDepth(6);
-    this.anims.create({ key: "tero-fly", frames: ["wings-up", "glide", "wings-down", "glide"].map(frame => ({ key: "tero", frame })), frameRate: 8, repeat: -1 });
-    this.tero = this.add.sprite(0, 0, "tero", "glide").setOrigin(0.5, 80 / 128).setDisplaySize(86, 86).setDepth(7).setVisible(false);
+    this.anims.create({
+      key: "tero-fly",
+      frames: ["wings-up", "glide", "wings-down", "glide"].map((frame) => ({
+        key: "tero",
+        frame,
+      })),
+      frameRate: 8,
+      repeat: -1,
+    });
+    this.tero = this.add
+      .sprite(0, 0, "tero", "glide")
+      .setOrigin(0.5, 80 / 128)
+      .setDisplaySize(86, 86)
+      .setDepth(7)
+      .setVisible(false);
     this.tero.play("tero-fly");
-    this.teroBomb = this.add.image(0, 0, "tero", "bomb").setDisplaySize(26, 26).setDepth(7).setVisible(false);
-    this.carriedBomb = this.add.image(0, 0, "tero", "bomb").setDisplaySize(26, 26).setDepth(6).setVisible(false);
+    this.teroBomb = this.add
+      .image(0, 0, "tero", "bomb")
+      .setDisplaySize(26, 26)
+      .setDepth(7)
+      .setVisible(false);
+    this.carriedBomb = this.add
+      .image(0, 0, "tero", "bomb")
+      .setDisplaySize(26, 26)
+      .setDepth(6)
+      .setVisible(false);
     this.hud = this.add
       .text(320, 28, "", {
         fontFamily: "monospace",
@@ -726,8 +770,10 @@ class Battle extends Phaser.Scene {
       lastDir = dir;
     }
     if (mine && weapon === TERO_WEAPON) {
-      if (this.keys.UP.isDown || touch.up) airTargetX = Math.max(20, airTargetX - delta * 0.12);
-      if (this.keys.DOWN.isDown || touch.down) airTargetX = Math.min(W - 20, airTargetX + delta * 0.12);
+      if (this.keys.UP.isDown || touch.up)
+        airTargetX = Math.max(20, airTargetX - delta * 0.12);
+      if (this.keys.DOWN.isDown || touch.down)
+        airTargetX = Math.min(W - 20, airTargetX + delta * 0.12);
     } else if (mine) {
       if (this.keys.UP.isDown || touch.up)
         angle = Math.max(-Math.PI, angle - delta * 0.001);
@@ -836,11 +882,17 @@ class Battle extends Phaser.Scene {
     this.carriedBomb.setVisible(!menu && Boolean(bird && !bird.dropped));
     if (bird) {
       this.tero.setPosition(bird.x, bird.y).setFlipX(bird.direction < 0);
-      this.carriedBomb.setPosition(bird.x, bird.y + 15).setAngle(-bird.direction * 70);
+      this.carriedBomb
+        .setPosition(bird.x, bird.y + 15)
+        .setAngle(-bird.direction * 70);
     }
-    const bomb = state.projectile?.weapon === TERO_WEAPON ? state.projectile : null;
+    const bomb =
+      state.projectile?.weapon === TERO_WEAPON ? state.projectile : null;
     this.teroBomb.setVisible(!menu && Boolean(bomb));
-    if (bomb) this.teroBomb.setPosition(bomb.x, bomb.y).setRotation(Math.atan2(bomb.vy, bomb.vx) - Math.PI / 2);
+    if (bomb)
+      this.teroBomb
+        .setPosition(bomb.x, bomb.y)
+        .setRotation(Math.atan2(bomb.vy, bomb.vx) - Math.PI / 2);
     if (state.projectile && !bomb) {
       const p = state.projectile;
       this.fx.fillStyle(0xfff0b9).fillCircle(p.x, p.y, 4);
@@ -945,9 +997,12 @@ class Battle extends Phaser.Scene {
             ? "PAUSA · ESPERANDO RECONEXIÓN"
             : `TURNO ${state.turn}  ·  ${state.team ? "CÍTRICOS" : "CELESTES"}  ·  ${state.phase === "flight" ? "¡AHÍ VA!" : state.phase === "settle" ? "IMPACTO" : mine ? "TU TURNO" : "TURNO RIVAL"}`,
     );
-    $("battle-message").textContent = state.airstrike && state.phase === "flight"
-      ? state.airstrike.dropped ? "TERO-BOMBA · ¡BOMBA FUERA!" : "TERO-BOMBA · APOYO AÉREO EN CAMINO"
-      : this.hud.text;
+    $("battle-message").textContent =
+      state.airstrike && state.phase === "flight"
+        ? state.airstrike.dropped
+          ? "TERO-BOMBA · ¡BOMBA FUERA!"
+          : "TERO-BOMBA · APOYO AÉREO EN CAMINO"
+        : this.hud.text;
     $("turn-label").textContent =
       `TURNO ${String(state.turn).padStart(2, "0")} / ${mode === "online" ? peers[state.team]?.name || "Esperando" : "PARTIDA LOCAL"}`;
     $("turn-name").textContent = state.team ? "Los Cítricos" : "Los Celestes";
@@ -956,15 +1011,24 @@ class Battle extends Phaser.Scene {
       `VIENTO ${state.wind < 0 ? "←" : "→"} ${Math.abs(state.wind).toFixed(0)} km/h`;
     $("wind").classList.toggle("wind-left", state.wind < 0);
     const cooldown = teroCooldown(state);
-    const teroButton = document.querySelector<HTMLButtonElement>('[data-weapon="3"]')!;
+    const teroButton =
+      document.querySelector<HTMLButtonElement>('[data-weapon="3"]')!;
     teroButton.disabled = cooldown > 0;
-    teroButton.title = cooldown ? `Tero-Bomba: faltan ${cooldown} turno(s) propios` : "Tero-Bomba listo · 70 de daño · recarga de 3 turnos propios";
-    $("tero-status").textContent = cooldown ? `RECARGA · ${cooldown} TURNOS` : "70 DAÑO · LISTO";
+    teroButton.title = cooldown
+      ? `Tero-Bomba: faltan ${cooldown} turno(s) propios`
+      : "Tero-Bomba listo · 70 de daño · recarga de 3 turnos propios";
+    $("tero-status").textContent = cooldown
+      ? `RECARGA · ${cooldown} TURNOS`
+      : "70 DAÑO · LISTO";
     $("tero-cooldown").hidden = cooldown === 0;
     $("tero-cooldown").textContent = String(cooldown);
     $("power").disabled = weapon === TERO_WEAPON;
-    $("power-label").textContent = weapon === TERO_WEAPON ? "OBJETIVO" : "POTENCIA";
-    $("power-value").textContent = weapon === TERO_WEAPON ? `${Math.round(airTargetX / W * 100)}% MAPA` : `${Math.round(power * 100)}%`;
+    $("power-label").textContent =
+      weapon === TERO_WEAPON ? "OBJETIVO" : "POTENCIA";
+    $("power-value").textContent =
+      weapon === TERO_WEAPON
+        ? `${Math.round((airTargetX / W) * 100)}% MAPA`
+        : `${Math.round(power * 100)}%`;
     $("power-shortcuts").hidden = weapon === TERO_WEAPON;
     $("fire").disabled =
       deployment.active ||
@@ -1020,6 +1084,10 @@ if (!window.SaltoPlay?.isOAuthCallback) {
   void startGame();
   void initializeAccount().catch((error) => {
     updateAccount();
-    notice(error instanceof Error ? error.message : "No se pudo conectar la cuenta. Reintentá.");
+    notice(
+      error instanceof Error
+        ? error.message
+        : "No se pudo conectar la cuenta. Reintentá.",
+    );
   });
 }

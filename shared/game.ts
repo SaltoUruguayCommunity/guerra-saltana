@@ -137,7 +137,12 @@ export function command(s: GameState, team: number, input: unknown) {
     )
       return false;
     if (a.weapon === TERO_WEAPON) {
-      if (teroCooldown(s) > 0 || typeof a.targetX !== "number" || !Number.isFinite(a.targetX)) return false;
+      if (
+        teroCooldown(s) > 0 ||
+        typeof a.targetX !== "number" ||
+        !Number.isFinite(a.targetX)
+      )
+        return false;
       const direction = s.team === 0 ? 1 : -1;
       s.airstrike = {
         x: direction === 1 ? -48 : W + 48,
@@ -246,7 +251,15 @@ export function step(s: GameState, dt = DT) {
     bird.x += bird.direction * 200 * dt;
     if (!bird.dropped && (bird.x - bird.targetX) * bird.direction >= 0) {
       bird.dropped = true;
-      s.projectile = { x: bird.targetX, y: bird.y + 16, vx: 0, vy: 25, weapon: TERO_WEAPON, age: 0, bounces: 0 };
+      s.projectile = {
+        x: bird.targetX,
+        y: bird.y + 16,
+        vx: 0,
+        vy: 25,
+        weapon: TERO_WEAPON,
+        age: 0,
+        bounces: 0,
+      };
     }
     if (bird.x < -80 || bird.x > W + 80) s.airstrike = null;
   }
