@@ -1,4 +1,4 @@
-/** Public surface used from the bundled SaltoPlay v0.3 SDK. */
+/** Public surface consumed from the hosted SaltoPlay SDK. */
 export interface SaltoUIOptions {
   enabled?: boolean;
   welcome?: boolean;

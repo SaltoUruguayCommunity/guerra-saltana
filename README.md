@@ -2,7 +2,7 @@
 
 Juego de artillería por turnos para SaltoUruguayServer. TypeScript en modo estricto, Phaser 3, Vite y servidor Node.js autoritativo con WebSocket. La dirección de arte v2 usa imágenes originales generadas con ImageGen: carpinchos humanoides, costanera y logo pixel art. No usa imágenes de otros juegos.
 
-Incluye SaltoPlay SDK 0.3 en `public/sdk/saltoplay.js`, sincronizado con el portal. Al conectar una cuenta, muestra automáticamente «Bienvenido, {SaltoTag}» con avatar cuando los permisos lo permiten; se puede desactivar con `ui: { welcome: false }`. La UI usa cápsulas oscuras y animación de expansión con soporte para movimiento reducido. La UI unificada notifica los guardados de nube confirmados y presenta automáticamente los logros cuando una integración llama a `achievements.requestUnlock` y la API confirma un desbloqueo nuevo. Los logros deben existir en la consola; no se inventan ni se conceden por dibujar la notificación. Se puede usar `sdk.ui.notify`, `showAchievement` (sólo visual), `configure` y `dismissAll`; los tipos están en `src/saltoplay.d.ts`. No hace falta añadir otro aviso de logro al juego.
+Carga el SDK oficial desde `https://play.saltouruguayserver.com/sdk/saltoplay.js`, sin mantener una copia local. Al conectar una cuenta, muestra automáticamente «Bienvenido, {SaltoTag}» con avatar cuando los permisos lo permiten; se puede desactivar con `ui: { welcome: false }`. La UI usa cápsulas oscuras y animación de expansión con soporte para movimiento reducido. La UI unificada notifica los guardados de nube confirmados y presenta automáticamente los logros cuando una integración llama a `achievements.requestUnlock` y la API confirma un desbloqueo nuevo. Los logros deben existir en la consola; no se inventan ni se conceden por dibujar la notificación. Se puede usar `sdk.ui.notify`, `showAchievement` (sólo visual), `configure` y `dismissAll`; los tipos están en `src/saltoplay.d.ts`. No hace falta añadir otro aviso de logro al juego.
 
 ## Ejecutar
 
@@ -34,7 +34,7 @@ Al comenzar una batalla local, reiniciarla o empezar una sala online nueva, `src
 
 `shared/game.ts`: simulación fija 30 Hz, colisión por máscara de píxeles, terreno, turnos, explosiones y victoria. `shared/types.ts` define unidades, proyectiles, acciones y mensajes de red compartidos entre cliente y servidor. Las acciones entrantes conservan validación en ejecución; los tipos no sustituyen la validación de red. El servidor ejecuta la simulación y sólo acepta intenciones del jugador activo. Publica 10 estados/s, eventos de cráteres y máscara completa cada segundo y al reconectar. El cliente online no calcula daño. La sesión usa un secreto aleatorio guardado en sessionStorage; nunca es una credencial de la plataforma. La partida se pausa si falta un jugador y conserva la sala hasta diez minutos tras desconectarse todos. Estado en memoria: reiniciar Node pierde salas. Listado público sólo muestra salas abiertas. No hay espectadores ni persistencia de partidas.
 
-`src/`: presentación Phaser, UI nativa superpuesta al escenario de toda la ventana y adaptador SaltoPlay. `src/saltoplay.d.ts` declara el contrato consumido del SDK original, que se mantiene sin modificar en JavaScript. `scripts/prepare-v2.ts` prepara el atlas y las texturas a partir de las imágenes ImageGen conservadas en `public/assets/source/`. `pnpm run assets` reconstruye esos archivos sin llamar de nuevo a ImageGen. El generador anterior se conserva con `pnpm run assets:legacy` y no se utiliza para los personajes de la versión actual.
+`src/`: presentación Phaser, UI nativa superpuesta al escenario de toda la ventana y adaptador SaltoPlay. `src/saltoplay.d.ts` declara el contrato consumido del SDK alojado en el portal. `scripts/prepare-v2.ts` prepara el atlas y las texturas a partir de las imágenes ImageGen conservadas en `public/assets/source/`. `pnpm run assets` reconstruye esos archivos sin llamar de nuevo a ImageGen. El generador anterior se conserva con `pnpm run assets:legacy` y no se utiliza para los personajes de la versión actual.
 
 Atlas v2: 12 frames de 64×64 (dos uniformes, seis poses por uniforme: reposo, dos pasos, salto, disparo y daño). Caminar intercala los pasos; reposo tiene un movimiento vertical de un píxel; disparo y daño tienen ventanas visuales; la eliminación reutiliza la pose de daño rotada. No se anuncia una animación de muerte dibujada por separado. Fondo y logo generados con ImageGen, suelo texturado extraído del fondo, cráteres mediante máscara dinámica, partículas de explosión de Phaser. Los archivos originales, los prompts completos y la procedencia están en [ASSETS.md](ASSETS.md).
 
@@ -46,7 +46,7 @@ La UI militar usa una consola de campaña con paneles verde oliva, biseles duros
 
 ## SaltoUruguayServer: contrato real y límites
 
-Documentación consultada el 23/10/2026 en el repositorio local oficial `play.saltouruguayserver.com/src/lib/docs.ts` y SDK `public/sdk/saltoplay.js` (v0.1). La consulta web de https://play.saltouruguayserver.com/ no fue accesible durante el desarrollo. Se incluye copia sin modificar del SDK real en `public/sdk/`.
+Documentación consultada el 23/10/2026 en el repositorio local oficial `play.saltouruguayserver.com/src/lib/docs.ts` y SDK `public/sdk/saltoplay.js` (v0.1). La consulta web de https://play.saltouruguayserver.com/ no fue accesible durante el desarrollo. El juego carga el SDK desde `https://play.saltouruguayserver.com/sdk/saltoplay.js`; requiere acceso al portal para descargarlo.
 
 Documentación del portal: https://play.saltouruguayserver.com/ (sección Developers). Métodos usados: `SaltoPlay.init`, `auth.getSession`, `auth.login`, `player.getSaltoTag`, `saves.get` y `saves.set`. Los resultados se guardan localmente y en el slot `stats` cuando hay sesión. Los conflictos de guardado se informan y no se sobreescriben automáticamente. Estas estadísticas son casuales del cliente, no resultados competitivos verificados.
 
@@ -60,7 +60,7 @@ Producción: `pnpm run build`, servir `dist/`, ejecutar `pnpm run server` en Nod
 
 ## Recursos y licencia
 
-Código y arte originales de este proyecto, disponibles para el propietario de SaltoUruguayServer. Phaser, ws, Vite y pngjs conservan sus licencias respectivas. El SDK incluido pertenece al repositorio de SaltoUruguayServer. No se incluyen marcas ni arte de Worms o Crazy Penguin Wars.
+Código y arte originales de este proyecto, disponibles para el propietario de SaltoUruguayServer. Phaser, ws, Vite y pngjs conservan sus licencias respectivas. El SDK alojado pertenece a SaltoUruguayServer. No se incluyen marcas ni arte de Worms o Crazy Penguin Wars.
 
 ## Estado de SaltoPlay y multijugador
 
