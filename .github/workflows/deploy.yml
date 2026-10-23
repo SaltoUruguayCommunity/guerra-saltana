@@ -39,6 +39,9 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build project
+        env:
+            VITE_SALTOPLAY_CLIENT_ID: ${{ vars.VITE_SALTOPLAY_CLIENT_ID }}
+            VITE_SALTOPLAY_REDIRECT_URI: ${{ vars.VITE_SALTOPLAY_REDIRECT_URI }}
         run: pnpm run build
 
       - name: Setup Pages
