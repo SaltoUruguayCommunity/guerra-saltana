@@ -81,9 +81,28 @@ const notice = (t: string) => ($("notice").textContent = t);
 let authInitialization: Promise<void> | undefined;
 function updateAccount(name?: string) {
   const connected = platform.session?.authenticated === true;
-  $("login").textContent = connected
-    ? "CUENTA CONECTADA ✓"
-    : "CONECTAR CUENTA ↗";
+  $("login").textContent = "CONECTAR CUENTA ↗";
+  $("login").hidden = connected;
+  $("account").hidden = !connected;
+  if (connected) {
+    const displayName = platform.profile?.displayName || "Jugador";
+    $("account-name").textContent = displayName;
+    $("account").title = `${displayName} · SaltoUruguayServer`;
+    $("account-initial").textContent = Array.from(displayName)[0]?.toUpperCase() || "J";
+    const avatar = $("account-avatar") as HTMLImageElement;
+    avatar.hidden = true;
+    $("account-initial").hidden = false;
+    avatar.onload = () => { avatar.hidden = false; $("account-initial").hidden = true; };
+    avatar.onerror = () => { avatar.hidden = true; $("account-initial").hidden = false; };
+    const avatarUrl = platform.profile?.avatar;
+    if (avatarUrl && /^https?:\/\//i.test(avatarUrl)) {
+      if (avatar.getAttribute("src") !== avatarUrl) avatar.src = avatarUrl;
+      else if (avatar.complete && avatar.naturalWidth > 0) {
+        avatar.hidden = false;
+        $("account-initial").hidden = true;
+      }
+    } else avatar.removeAttribute("src");
+  }
   $("login").title = connected
     ? "Cuenta conectada a SaltoUruguayServer"
     : "Conectar cuenta con SaltoUruguayServer";

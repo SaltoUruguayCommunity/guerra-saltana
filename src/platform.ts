@@ -6,6 +6,7 @@ interface Statistics {
 export class Platform {
   sdk?: SaltoPlayClient;
   session?: SaltoSession;
+  profile?: { displayName: string; avatar: string | null };
   async init() {
     if (!window.SaltoPlay)
       throw new Error("No se pudo cargar el SDK de SaltoUruguayServer. Reintentá la conexión.");
@@ -31,7 +32,14 @@ export class Platform {
     );
     this.session = await this.sdk.auth.getSession();
     if (this.session.authenticated) {
-      const tag = await this.sdk.player.getSaltoTag().catch(() => null);
+      const [tag, profile] = await Promise.all([
+        this.sdk.player.getSaltoTag().catch(() => null),
+        this.sdk.player.getProfile().catch(() => null),
+      ]);
+      this.profile = {
+        displayName: profile?.displayName || tag?.displayName || tag?.tag || "Jugador",
+        avatar: profile?.avatar ?? null,
+      };
       return tag?.tag || tag?.displayName;
     }
   }

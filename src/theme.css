@@ -71,6 +71,38 @@ button:disabled {
   opacity: 0.5;
   cursor: default;
 }
+[hidden] {
+  display: none !important;
+}
+.account {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 220px;
+  min-width: 0;
+  padding: 5px 9px;
+  background: var(--panel);
+  border: 2px solid var(--line);
+}
+.account-picture {
+  display: grid;
+  place-items: center;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  background: #17281b;
+  color: var(--brass);
+}
+.account-picture img {
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
+}
+#account-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 input {
   min-width: 0;
   border-bottom: 1px solid #6d8355;
@@ -1103,6 +1135,12 @@ kbd {
   }
   #login {
     max-width: 74px;
+    font-size: 6px;
+  }
+  .account {
+    max-width: 125px;
+    gap: 5px;
+    padding: 4px;
     font-size: 6px;
   }
   .field-title {
